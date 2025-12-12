@@ -67,7 +67,7 @@ export default function EmailCapture({ onSuccess }: EmailCaptureProps) {
         <button
           type="submit"
           disabled={status === 'loading' || status === 'success' || !email}
-          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[140px]"
+          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[140px] shadow-md hover:shadow-lg hover:scale-105"
         >
           {status === 'loading' ? (
             <>

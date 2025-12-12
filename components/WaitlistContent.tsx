@@ -98,7 +98,7 @@ export default function WaitlistContent({ initialCount }: WaitlistContentProps) 
                 reality: '(Tomorrow has even more tasks.)'
               }
             ].map((item, index) => (
-              <div key={index} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <div key={index} className="bg-gray-50 rounded-lg p-6 border-l-4 border-l-blue-500 border-t border-r border-b border-gray-200">
                 <div className="text-3xl mb-3">{item.icon}</div>
                 <p className="text-gray-900 font-medium mb-2">{item.quote}</p>
                 <p className="text-gray-600 text-sm">{item.reality}</p>
@@ -144,37 +144,6 @@ export default function WaitlistContent({ initialCount }: WaitlistContentProps) 
                   <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
                   <p className="text-gray-600">{feature.description}</p>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Social Proof */}
-      <section className="px-6 py-20 bg-blue-600 text-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Early Feedback from Beta Users
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                quote: 'For the first time in my life, I\'m planning days I can actually finish. The guilt is gone.',
-                author: 'Sarah, Software Engineer'
-              },
-              {
-                quote: 'I thought I was bad at time management. Turns out I was just bad at time math.',
-                author: 'Mike, Product Designer'
-              },
-              {
-                quote: 'Motion felt like losing control. StackDay feels like gaining clarity.',
-                author: 'Jamie, Startup Founder'
-              }
-            ].map((testimonial, index) => (
-              <div key={index} className="bg-white/10 rounded-lg p-6">
-                <p className="text-white/90 mb-4 italic">"{testimonial.quote}"</p>
-                <p className="text-white/70 text-sm">— {testimonial.author}</p>
               </div>
             ))}
           </div>
