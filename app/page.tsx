@@ -1,11 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import EmailCapture from '@/components/EmailCapture';
 import { CheckCircle, AlertTriangle, Clock, Brain } from 'lucide-react';
 
 export default function Home() {
-  const [emailCount, setEmailCount] = useState(127);
+  const [emailCount, setEmailCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch initial waitlist count from API
+  useEffect(() => {
+    fetch('/api/waitlist')
+      .then(res => res.json())
+      .then(data => {
+        setEmailCount(data.count || 0);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch waitlist count:', err);
+        setIsLoading(false);
+      });
+  }, []);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white">
@@ -46,8 +61,13 @@ export default function Home() {
           <div className="mt-10 max-w-md mx-auto">
             <EmailCapture onSuccess={() => setEmailCount(prev => prev + 1)} />
             <p className="text-sm text-gray-500 mt-3">
-              🎉 First 100 people get <span className="font-semibold">40% off forever</span> • 
-              <span className="text-blue-600 font-semibold"> {Math.max(0, 100 - emailCount)} spots left</span>
+              🎉 First 100 people get <span className="font-semibold">40% off forever</span>
+              {!isLoading && (
+                <>
+                  {' • '}
+                  <span className="text-blue-600 font-semibold">{Math.max(0, 100 - emailCount)} spots left</span>
+                </>
+              )}
             </p>
           </div>
 
@@ -186,7 +206,8 @@ export default function Home() {
           </h2>
           
           <p className="text-lg text-gray-600 mb-8">
-            Join {emailCount} people already on the waitlist. Launching March 2026.
+            {!isLoading && <>Join {emailCount} people already on the waitlist. </>}
+            Launching March 2026.
           </p>
 
           <div className="max-w-md mx-auto">

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-// Simple in-memory storage for the demo
-// In production, you'd use Supabase, ConvertKit, or another service
-const waitlist: Set<string> = new Set();
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +21,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already on waitlist
-    if (waitlist.has(email.toLowerCase())) {
+    const { data: existingEmail } = await supabase
+      .from('waitlist')
+      .select('email')
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (existingEmail) {
       return NextResponse.json(
         { error: 'This email is already on the waitlist' },
         { status: 400 }
@@ -26,44 +35,31 @@ export async function POST(request: NextRequest) {
     }
 
     // Add to waitlist
-    waitlist.add(email.toLowerCase());
-
-    // In production, you would:
-    // 1. Save to database (Supabase)
-    // 2. Send confirmation email
-    // 3. Add to email service (ConvertKit, Mailchimp, etc.)
-    
-    // For now, just log it
-    console.log(`New waitlist signup: ${email}`);
-    console.log(`Total waitlist size: ${waitlist.size}`);
-
-    // Optional: If you want to use Supabase right away, uncomment this:
-    /*
-    import { createClient } from '@supabase/supabase-js';
-    
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_KEY!
-    );
-
-    const { error } = await supabase
+    const { error: insertError } = await supabase
       .from('waitlist')
-      .insert([{ 
+      .insert([{
         email: email.toLowerCase(),
         source: 'coming-soon',
         created_at: new Date().toISOString()
       }]);
 
-    if (error) {
-      console.error('Supabase error:', error);
-      throw error;
+    if (insertError) {
+      console.error('Supabase insert error:', insertError);
+      throw insertError;
     }
-    */
+
+    // Get updated count
+    const { count } = await supabase
+      .from('waitlist')
+      .select('*', { count: 'exact', head: true });
+
+    console.log(`New waitlist signup: ${email}`);
+    console.log(`Total waitlist size: ${count}`);
 
     return NextResponse.json(
-      { 
+      {
         message: 'Successfully joined waitlist',
-        position: waitlist.size + 127 // Starting from 127 as shown in the UI
+        position: count || 0
       },
       { status: 200 }
     );
@@ -77,9 +73,28 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  // Optional: Return waitlist count for display
-  return NextResponse.json({
-    count: waitlist.size + 127,
-    spotsLeft: Math.max(0, 100 - waitlist.size)
-  });
+  try {
+    // Get actual count from database
+    const { count, error } = await supabase
+      .from('waitlist')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) {
+      console.error('Supabase count error:', error);
+      throw error;
+    }
+
+    const totalCount = count || 0;
+
+    return NextResponse.json({
+      count: totalCount,
+      spotsLeft: Math.max(0, 100 - totalCount)
+    });
+  } catch (error) {
+    console.error('Error fetching waitlist count:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch waitlist count' },
+      { status: 500 }
+    );
+  }
 }
