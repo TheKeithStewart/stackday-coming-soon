@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -55,6 +56,9 @@ export async function POST(request: NextRequest) {
 
     console.log(`New waitlist signup: ${email}`);
     console.log(`Total waitlist size: ${count}`);
+
+    // Immediately revalidate the homepage cache
+    revalidatePath('/');
 
     return NextResponse.json(
       {
